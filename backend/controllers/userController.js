@@ -28,6 +28,8 @@ const loginUser = async (req, res) => {
       res.json({
         success: true,
         token,
+        name: user.name,
+        email: user.email,
       });
     } else {
       res.json({
@@ -93,13 +95,26 @@ const adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if (
-      email === process.env.ADMIN_EMAIL &&
-      password === process.env.ADMIN_PASSWORD
-    ) {
-      const token = jwt.sign(email + password, process.env.JWT_SECRET);
+    const user = await userModel.findOne({ email, role: "Admin", isActive: true, isEmailVerified: true });
 
-      res.json({ success: true, token });
+    if (!user) {
+      return res.json({
+        success: false,
+        message: "Admin not found or not active",
+      });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (isMatch) {
+      const token = createToken(user._id);
+      res.json({
+        success: true,
+        token,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      });
     } else {
       res.json({
         success: false,
@@ -108,10 +123,7 @@ const adminLogin = async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    res.json({
-      success: false,
-      message: error.message,
-    });
+    res.json({ success: false, message: error.message });
   }
 };
 
