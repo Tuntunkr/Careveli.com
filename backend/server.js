@@ -7,6 +7,8 @@ import userRouter from "./routes/userRoute.js";
 import productRouter from "./routes/productRoute.js";
 import cartRouter from "./routes/cartRoute.js";
 import orderRouter from "./routes/orderRoute.js";
+import swaggerUi from "swagger-ui-express";
+import swaggerSpec from "./configs/swagger.js";
 
 // App Config
 const app = express();
@@ -22,6 +24,9 @@ connectCloudinary();
 app.use(express.json());
 app.use(cors());
 
+// Swagger Documentation
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 // Api Endpoints
 app.use("/api/user", userRouter);
 app.use("/api/product", productRouter);
@@ -34,4 +39,5 @@ app.get("/", (req, res) => {
 
 app.listen(port, () => {
   console.log(`Server started at port ${port}`);
+  console.log(`Swagger documentation available at http://localhost:${port}/api-docs`);
 });

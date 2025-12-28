@@ -32,6 +32,20 @@ const addProduct = async (req, res) => {
       })
     );
 
+    // Parse sizes - handle both comma-separated string and JSON array
+    let sizesArray;
+    if (typeof sizes === 'string') {
+      // Check if it's a JSON array string
+      if (sizes.trim().startsWith('[')) {
+        sizesArray = JSON.parse(sizes.replace(/'/g, '"'));
+      } else {
+        // It's a comma-separated string
+        sizesArray = sizes.split(',').map(size => size.trim());
+      }
+    } else {
+      sizesArray = sizes;
+    }
+
     const productData = {
       name,
       description,
@@ -39,7 +53,7 @@ const addProduct = async (req, res) => {
       price: Number(price),
       subCategory,
       bestseller: bestseller === "true" ? true : false,
-      sizes: JSON.parse(sizes.replace(/'/g, '"')),
+      sizes: sizesArray,
       image: imagesUrl,
       date: Date.now(),
     };
